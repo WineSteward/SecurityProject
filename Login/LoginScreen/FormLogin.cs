@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
@@ -30,29 +31,61 @@ namespace LoginScreen
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            ///<summary>Estabelecer ligacao com o servidor, ao inicializar o form</summary
-            IPEndPoint endPoint = new IPEndPoint(IPAddress.Loopback, PORT);
 
-            client = new TcpClient();
-            client.Connect(endPoint);
+            try
+            {
 
-            networkStream = client.GetStream();
+                ///<summary>Estabelecer ligacao com o servidor, ao inicializar o form</summary
+                //criar um conjunto IP + Port do servidor
+                IPEndPoint endPoint = new IPEndPoint(IPAddress.Loopback, PORT);
 
-            protocolSI = new ProtocolSI();
+                //instaciar o cliente TCP
+                client = new TcpClient();
 
-            //O CLIENTE ENVIA AO SERVIDOR A SUA CHAVE PUBLICA
-            //LOGO temos de crirar a chave publica
+                //efetuar a ligacao ao servidor
+                client.Connect(endPoint);
 
-            //Algoritmo assimetrico
-            //DEFINIR E INSTANCIAR O RSA
-            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+                //obter a ligacao do servidor
+                networkStream = client.GetStream();
 
-            //criar uma string XML contendo a chave do objeto AssymetricAlgorithm
-            //para obter a chave publica
+                protocolSI = new ProtocolSI();
 
-            string publicKey = rsa.ToXmlString(false); //FALSE devolve UNICAMENTE a Public Key
+                //O CLIENTE ENVIA AO SERVIDOR A SUA CHAVE PUBLICA
+                //LOGO temos de crirar a chave publica
 
-            string bothKeys = rsa.ToXmlString(true); // TRUE devolve AMBAS AS CHAVES
+                //Algoritmo assimetrico
+                //DEFINIR E INSTANCIAR O RSA
+                RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+
+                //criar uma string XML contendo a chave do objeto AssymetricAlgorithm
+                //para obter a chave publica
+
+                string publicKey = rsa.ToXmlString(false); //FALSE devolve UNICAMENTE a Public Key
+
+                ///<summary> Preparacao para o envio da msg</summary>
+                byte[] packet = protocolSI.Make(ProtocolSICmdType.PUBLIC_KEY, publicKey);
+                networkStream.Write(packet, 0, packet.Length);
+
+            }
+            catch (Exception)
+            {
+                //pop up que deu erro algo do genero
+            }
+
+            finally
+            {
+                //Fechar a ligacao se estiver aberta
+                if (networkStream != null)
+                {
+                    networkStream.Close();
+                }
+                //Fecha a comunicacao se estiver aberta
+                if (client != null)
+                {
+                    client.Close();
+
+                }
+            }
             
         }
 
