@@ -35,7 +35,7 @@ namespace LoginScreen
             try
             {
 
-                ///<summary>Estabelecer ligacao com o servidor, ao inicializar o form</summary
+                //Estabelecer ligacao com o servidor, ao inicializar o form
                 //criar um conjunto IP + Port do servidor
                 IPEndPoint endPoint = new IPEndPoint(IPAddress.Loopback, PORT);
 
@@ -62,8 +62,10 @@ namespace LoginScreen
 
                 string publicKey = rsa.ToXmlString(false); //FALSE devolve UNICAMENTE a Public Key
 
-                ///<summary> Preparacao para o envio da msg</summary>
+                //Preparacao para o envio da chave publica
                 byte[] packet = protocolSI.Make(ProtocolSICmdType.PUBLIC_KEY, publicKey);
+                
+                //envio da chave publica
                 networkStream.Write(packet, 0, packet.Length);
 
             }

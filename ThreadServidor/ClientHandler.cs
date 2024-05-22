@@ -37,17 +37,17 @@ namespace ThreadServidor
             NetworkStream networkStream = clientAtual.GetStream();
             ProtocolSI protocolSI = new ProtocolSI();
 
-            ///<summary> Enquanto nao receber a informacao para fechar a comunicacao</summary>
+            //Enquanto nao receber a informacao para fechar a comunicacao
             while (protocolSI.GetCmdType() != ProtocolSICmdType.EOT)
             {
 
                 int byteRead = networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
                 byte[] ack;
 
-                ///<summary>Com este switch vamos determinar o tipo de msg que estamos a receber</summary>
+                //Com este switch vamos determinar o tipo de msg que estamos a receber
                 switch (protocolSI.GetCmdType())
                 {
-                    ///<summary>Recebi uma msg (string) </summary>
+                    //Recebi uma msg (string)
                     case ProtocolSICmdType.DATA:
 
                         // enviar msg para a consola do servidor com o ID do client e a msg
@@ -75,8 +75,8 @@ namespace ThreadServidor
 
                     case ProtocolSICmdType.PUBLIC_KEY:
 
-                        clientPublicKey = byteRead.ToString();
-                        
+                        //guardar a public key
+                        clientPublicKey = protocolSI.GetStringFromData();
                         
                         //criamos um ack
                         ack = protocolSI.Make(ProtocolSICmdType.ACK);

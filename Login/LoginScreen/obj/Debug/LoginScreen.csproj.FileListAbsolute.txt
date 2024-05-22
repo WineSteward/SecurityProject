@@ -8,3 +8,14 @@ C:\Users\Utilizador\Desktop\Login\LoginScreen\obj\Debug\LoginScreen.csproj.Gener
 C:\Users\Utilizador\Desktop\Login\LoginScreen\obj\Debug\LoginScreen.csproj.CoreCompileInputs.cache
 C:\Users\Utilizador\Desktop\Login\LoginScreen\obj\Debug\LoginScreen.exe
 C:\Users\Utilizador\Desktop\Login\LoginScreen\obj\Debug\LoginScreen.pdb
+C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\Login\LoginScreen\bin\Debug\LoginScreen.exe.config
+C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\Login\LoginScreen\bin\Debug\LoginScreen.exe
+C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\Login\LoginScreen\bin\Debug\LoginScreen.pdb
+C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\Login\LoginScreen\obj\Debug\LoginScreen.csproj.AssemblyReference.cache
+C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\Login\LoginScreen\obj\Debug\LoginScreen.FormLogin.resources
+C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\Login\LoginScreen\obj\Debug\LoginScreen.Properties.Resources.resources
+C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\Login\LoginScreen\obj\Debug\LoginScreen.csproj.GenerateResource.cache
+C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\Login\LoginScreen\obj\Debug\LoginScreen.csproj.CoreCompileInputs.cache
+C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\Login\LoginScreen\obj\Debug\LoginScr.3B07A5F0.Up2Date
+C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\Login\LoginScreen\obj\Debug\LoginScreen.exe
+C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\Login\LoginScreen\obj\Debug\LoginScreen.pdb
