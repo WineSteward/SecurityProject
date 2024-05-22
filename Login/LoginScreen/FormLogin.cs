@@ -54,7 +54,6 @@ namespace LoginScreen
                 //LOGO temos de crirar a chave publica
 
                 //Algoritmo assimetrico
-                //DEFINIR E INSTANCIAR O RSA
                 RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
 
                 //criar uma string XML contendo a chave do objeto AssymetricAlgorithm
