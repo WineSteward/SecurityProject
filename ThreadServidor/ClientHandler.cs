@@ -25,16 +25,13 @@ namespace ThreadServidor
         {
             this.clientAtual = clientAtual;
             this.clientID = clientID;
-
         }
 
 
         public void Handle()
         {
-
             Thread thread = new Thread(threadHandler);
             thread.Start();
-
         }
 
         private void threadHandler()
@@ -55,8 +52,11 @@ namespace ThreadServidor
                     //Recebi uma msg (string)
                     case ProtocolSICmdType.DATA:
 
+                        //decifragem da mensagem recebida do cliente
+                        string mensagemDecifrada = DecifrarTexto(protocolSI.GetStringFromData());
+
                         // enviar msg para a consola do servidor com o ID do client e a msg
-                        Console.WriteLine("Cliente" + clientID + " : " + protocolSI.GetStringFromData());
+                        Console.WriteLine("Cliente" + clientID + " : " + mensagemDecifrada);
 
                         //criamos um ack
                         ack = protocolSI.Make(ProtocolSICmdType.ACK);
@@ -83,14 +83,6 @@ namespace ThreadServidor
                         //guardar a public key
                         clientPublicKey = protocolSI.GetStringFromData();
 
-                        //é necessario mandar ack? Quando é que mandamos ack
-
-                        //criamos um ack
-                        ack = protocolSI.Make(ProtocolSICmdType.ACK);
-
-                        //devolvemos o ack para a stream
-                        networkStream.Write(ack, 0, ack.Length);
-
                         //INICIALIZAR O SERVIÇO DE CIFRAGEM AES
                         aes = new AesCryptoServiceProvider();
 
@@ -104,14 +96,19 @@ namespace ThreadServidor
 
                         iv = GerarVetorInicializacao(clientPublicKey);
 
-                        //cifragem da chave simetrica
-                        string cypherdSymKey = CifrarMensagem(key.ToString());
+                        //cifragem da chave simetrica e IV
+                        string cypherdSymKey = CifrarMensagem(Convert.ToBase64String(key));
+                        string cypherdIV = CifrarMensagem(Convert.ToBase64String(iv));
 
                         //preparacao do envio da chave simetrica
-                        byte[] packet = protocolSI.Make(ProtocolSICmdType.PUBLIC_KEY, cypherdSymKey);
-                        
-                        //envio da chave sym cifrada para a stream
-                        networkStream.Write(packet, 0, packet.Length);
+                        byte[] packetPK = protocolSI.Make(ProtocolSICmdType.PUBLIC_KEY, cypherdSymKey);
+                        networkStream.Write(packetPK, 0, packetPK.Length);
+
+
+                        //preparacao do envio do IV
+                        byte[] packetIV = protocolSI.Make(ProtocolSICmdType.IV, cypherdIV);
+                        networkStream.Write(packetIV, 0, packetIV.Length);
+
 
                         break;
                 }
@@ -174,5 +171,33 @@ namespace ThreadServidor
 
             return textoCifradoBase64;
         }
+
+        private string DecifrarTexto(string textoCifradoBase64)
+        {
+            //conversao da string textoCifrado em array de bytes
+            byte[] textoCifrado = Convert.FromBase64String(textoCifradoBase64);
+
+            //Reservar espaço na memoria para guardar o texto e decifra lo
+            MemoryStream memoryStream = new MemoryStream(textoCifrado);
+
+            //Inicializar o sitema de DECIFRAGEM (read)
+            CryptoStream cryptoStream = new CryptoStream(memoryStream, aes.CreateDecryptor(), CryptoStreamMode.Read);
+
+            //Array de bytes do mesmo tamanho do espaço que reservamos anteriormente
+            byte[] bytesParaDecifrar = new byte[memoryStream.Length];
+
+            //varivavel para guardar o numero de bytes decifrados
+            int bytesLidos = 0;
+
+            //Decifragem dos Bytes e guardamos a bytes que lemos
+            bytesLidos = cryptoStream.Read(bytesParaDecifrar, 0, bytesParaDecifrar.Length);
+            cryptoStream.Close();
+
+            //conversao de int para string (texto)
+            string textoDecifrado = Encoding.UTF8.GetString(bytesParaDecifrar, 0, bytesLidos);
+
+            return textoDecifrado;
+        }
+
     }
 }

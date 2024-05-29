@@ -28,13 +28,23 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormCliente));
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxMessage = new System.Windows.Forms.TextBox();
             this.btnEnviar = new System.Windows.Forms.Button();
             this.groupBoxLogin = new System.Windows.Forms.GroupBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.groupBox1.SuspendLayout();
+            this.groupBoxConversa = new System.Windows.Forms.GroupBox();
+            this.btnRegisto = new System.Windows.Forms.Button();
+            this.btnLogin = new System.Windows.Forms.Button();
+            this.pictureBox4 = new System.Windows.Forms.PictureBox();
+            this.pictureBox5 = new System.Windows.Forms.PictureBox();
+            this.textBoxPassword = new System.Windows.Forms.TextBox();
+            this.textBoxUsername = new System.Windows.Forms.TextBox();
+            this.groupBoxLogin.SuspendLayout();
+            this.groupBoxConversa.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -56,19 +66,27 @@
             // 
             // btnEnviar
             // 
+            this.btnEnviar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(16)))), ((int)(((byte)(72)))), ((int)(((byte)(98)))));
+            this.btnEnviar.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.btnEnviar.Location = new System.Drawing.Point(277, 345);
             this.btnEnviar.Name = "btnEnviar";
             this.btnEnviar.Size = new System.Drawing.Size(77, 41);
             this.btnEnviar.TabIndex = 2;
             this.btnEnviar.Text = "Enviar";
-            this.btnEnviar.UseVisualStyleBackColor = true;
+            this.btnEnviar.UseVisualStyleBackColor = false;
             this.btnEnviar.Click += new System.EventHandler(this.btnEnviar_Click);
             // 
             // groupBoxLogin
             // 
+            this.groupBoxLogin.Controls.Add(this.btnRegisto);
+            this.groupBoxLogin.Controls.Add(this.btnLogin);
+            this.groupBoxLogin.Controls.Add(this.pictureBox4);
+            this.groupBoxLogin.Controls.Add(this.pictureBox5);
+            this.groupBoxLogin.Controls.Add(this.textBoxPassword);
+            this.groupBoxLogin.Controls.Add(this.textBoxUsername);
             this.groupBoxLogin.Location = new System.Drawing.Point(16, 18);
             this.groupBoxLogin.Name = "groupBoxLogin";
-            this.groupBoxLogin.Size = new System.Drawing.Size(282, 225);
+            this.groupBoxLogin.Size = new System.Drawing.Size(357, 420);
             this.groupBoxLogin.TabIndex = 3;
             this.groupBoxLogin.TabStop = false;
             this.groupBoxLogin.Text = "Zona de Login";
@@ -80,30 +98,94 @@
             this.progressBar1.Size = new System.Drawing.Size(24, 454);
             this.progressBar1.TabIndex = 4;
             // 
-            // groupBox1
+            // groupBoxConversa
             // 
-            this.groupBox1.Controls.Add(this.textBoxMessage);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Controls.Add(this.btnEnviar);
-            this.groupBox1.Location = new System.Drawing.Point(429, 18);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(359, 420);
-            this.groupBox1.TabIndex = 4;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Zona de Conversa";
+            this.groupBoxConversa.Controls.Add(this.textBoxMessage);
+            this.groupBoxConversa.Controls.Add(this.label1);
+            this.groupBoxConversa.Controls.Add(this.btnEnviar);
+            this.groupBoxConversa.Enabled = false;
+            this.groupBoxConversa.Location = new System.Drawing.Point(429, 18);
+            this.groupBoxConversa.Name = "groupBoxConversa";
+            this.groupBoxConversa.Size = new System.Drawing.Size(359, 420);
+            this.groupBoxConversa.TabIndex = 4;
+            this.groupBoxConversa.TabStop = false;
+            this.groupBoxConversa.Text = "Zona de Conversa";
+            // 
+            // btnRegisto
+            // 
+            this.btnRegisto.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(16)))), ((int)(((byte)(72)))), ((int)(((byte)(98)))));
+            this.btnRegisto.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.btnRegisto.Location = new System.Drawing.Point(119, 306);
+            this.btnRegisto.Name = "btnRegisto";
+            this.btnRegisto.Size = new System.Drawing.Size(115, 33);
+            this.btnRegisto.TabIndex = 17;
+            this.btnRegisto.Text = "Registo";
+            this.btnRegisto.UseVisualStyleBackColor = false;
+            this.btnRegisto.Click += new System.EventHandler(this.btnRegisto_Click);
+            // 
+            // btnLogin
+            // 
+            this.btnLogin.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(16)))), ((int)(((byte)(72)))), ((int)(((byte)(98)))));
+            this.btnLogin.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.btnLogin.Location = new System.Drawing.Point(119, 250);
+            this.btnLogin.Name = "btnLogin";
+            this.btnLogin.Size = new System.Drawing.Size(115, 33);
+            this.btnLogin.TabIndex = 16;
+            this.btnLogin.Text = "Login";
+            this.btnLogin.UseVisualStyleBackColor = false;
+            this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
+            // 
+            // pictureBox4
+            // 
+            this.pictureBox4.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox4.Image")));
+            this.pictureBox4.Location = new System.Drawing.Point(32, 79);
+            this.pictureBox4.Name = "pictureBox4";
+            this.pictureBox4.Size = new System.Drawing.Size(57, 27);
+            this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox4.TabIndex = 15;
+            this.pictureBox4.TabStop = false;
+            // 
+            // pictureBox5
+            // 
+            this.pictureBox5.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox5.Image")));
+            this.pictureBox5.Location = new System.Drawing.Point(32, 179);
+            this.pictureBox5.Name = "pictureBox5";
+            this.pictureBox5.Size = new System.Drawing.Size(57, 27);
+            this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox5.TabIndex = 14;
+            this.pictureBox5.TabStop = false;
+            // 
+            // textBoxPassword
+            // 
+            this.textBoxPassword.Location = new System.Drawing.Point(95, 186);
+            this.textBoxPassword.Name = "textBoxPassword";
+            this.textBoxPassword.Size = new System.Drawing.Size(229, 20);
+            this.textBoxPassword.TabIndex = 13;
+            // 
+            // textBoxUsername
+            // 
+            this.textBoxUsername.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBoxUsername.Location = new System.Drawing.Point(95, 86);
+            this.textBoxUsername.Name = "textBoxUsername";
+            this.textBoxUsername.Size = new System.Drawing.Size(229, 20);
+            this.textBoxUsername.TabIndex = 12;
             // 
             // FormCliente
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.groupBoxConversa);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.groupBoxLogin);
             this.Name = "FormCliente";
             this.Text = "FormCliente";
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            this.groupBoxLogin.ResumeLayout(false);
+            this.groupBoxLogin.PerformLayout();
+            this.groupBoxConversa.ResumeLayout(false);
+            this.groupBoxConversa.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -115,7 +197,13 @@
         private System.Windows.Forms.Button btnEnviar;
         private System.Windows.Forms.GroupBox groupBoxLogin;
         private System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox groupBoxConversa;
+        private System.Windows.Forms.Button btnRegisto;
+        private System.Windows.Forms.Button btnLogin;
+        private System.Windows.Forms.PictureBox pictureBox4;
+        private System.Windows.Forms.PictureBox pictureBox5;
+        private System.Windows.Forms.TextBox textBoxPassword;
+        private System.Windows.Forms.TextBox textBoxUsername;
     }
 }
 
