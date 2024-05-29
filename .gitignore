@@ -1,3 +1,4 @@
-**/Login/vs/
-**/ThreadsComCliente/vs/
-**/ThreadServidor/vs/
+.vs/
+obj/
+bin/
+packages/

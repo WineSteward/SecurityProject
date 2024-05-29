@@ -54,17 +54,16 @@ namespace ThreadsComCliente
             }
         }
 
-        private void btnSair_Click(object sender, EventArgs e)
+        private void FormCliente_FormClosing(object sender, FormClosingEventArgs e)
         {
-
             byte[] eot = protocolSI.Make(ProtocolSICmdType.EOT);
             networkStream.Write(eot, 0, eot.Length);
             networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
 
             networkStream.Close();
             client.Close();
-        
         }
+
     }
 }
 
