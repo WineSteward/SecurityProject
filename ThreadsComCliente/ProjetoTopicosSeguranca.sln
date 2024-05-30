@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cliente", "Cliente.csproj",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreadServidor", "..\ThreadServidor\ThreadServidor.csproj", "{F30EB03E-4AD1-40A8-9207-856A263B90DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoginScreen", "..\Login\LoginScreen\LoginScreen.csproj", "{425FD956-D47A-47B1-AD93-F011FABC15F1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{F30EB03E-4AD1-40A8-9207-856A263B90DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F30EB03E-4AD1-40A8-9207-856A263B90DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F30EB03E-4AD1-40A8-9207-856A263B90DB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{425FD956-D47A-47B1-AD93-F011FABC15F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{425FD956-D47A-47B1-AD93-F011FABC15F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{425FD956-D47A-47B1-AD93-F011FABC15F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{425FD956-D47A-47B1-AD93-F011FABC15F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

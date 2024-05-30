@@ -20,6 +20,7 @@ namespace ThreadServidor
         private byte[] key;
         private byte[] iv;
         AesCryptoServiceProvider aes;
+        private RSACryptoServiceProvider rsa;
 
         public ClientHandler(TcpClient clientAtual, int clientID)
         {
@@ -86,27 +87,33 @@ namespace ThreadServidor
                         //INICIALIZAR O SERVIÇO DE CIFRAGEM AES
                         aes = new AesCryptoServiceProvider();
 
-                        //GUARDAR Sym Key e IV Gerados
-                        key = aes.Key;
-
-                        iv = aes.IV;
+                        //instanciar o rsa
+                        rsa = new RSACryptoServiceProvider();
 
                         //Gerar chave sym e iv a partir da chave publica do cliente
                         key = GerarChaveSym(clientPublicKey);
 
                         iv = GerarVetorInicializacao(clientPublicKey);
 
-                        //cifragem da chave simetrica e IV
-                        string cypherdSymKey = CifrarMensagem(Convert.ToBase64String(key));
-                        string cypherdIV = CifrarMensagem(Convert.ToBase64String(iv));
+                        //GUARDAR Sym Key e IV Gerados
+                        aes.Key = key;
+                        aes.IV = iv;
+
+                        //CIFRAR IV E SYMKEY UTILIZANDO O ALGORITMO RSA
+                        byte[] cypherdSymKey = rsa.Encrypt(key, true);
+                        byte[] cypherdIV = rsa.Encrypt(iv, true);
+
+                        string cypherdSymKeyB64 = Convert.ToBase64String(cypherdSymKey);
+                        string cypherdIVB64 = Convert.ToBase64String(cypherdIV);
+
 
                         //preparacao do envio da chave simetrica
-                        byte[] packetPK = protocolSI.Make(ProtocolSICmdType.PUBLIC_KEY, cypherdSymKey);
+                        byte[] packetPK = protocolSI.Make(ProtocolSICmdType.PUBLIC_KEY, cypherdSymKeyB64);
                         networkStream.Write(packetPK, 0, packetPK.Length);
 
 
                         //preparacao do envio do IV
-                        byte[] packetIV = protocolSI.Make(ProtocolSICmdType.IV, cypherdIV);
+                        byte[] packetIV = protocolSI.Make(ProtocolSICmdType.IV, cypherdIVB64);
                         networkStream.Write(packetIV, 0, packetIV.Length);
 
 
