@@ -63,7 +63,9 @@ namespace ThreadsComCliente
                 //criar uma string XML contendo a chave do objeto AssymetricAlgorithm
                 //para obter a chave publica
 
-                string publicKey = rsa.ToXmlString(false); //FALSE devolve UNICAMENTE a Public Key
+                string publicKey = rsa.ToXmlString(false); //FALSE devolve UNICAMENTE a PublicKey
+
+                string privateKey = rsa.ToXmlString(true); //FALSE devolve a PublicKey e a PrivateKey
 
                 //Preparacao para o envio da chave publica
                 byte[] packet = protocolSI.Make(ProtocolSICmdType.PUBLIC_KEY, publicKey);
@@ -74,18 +76,20 @@ namespace ThreadsComCliente
 
                 //LEITURA DA CHAVE SIMETRICA CRIADA PELO SERVIDOR COM BASE NA CHAVE PUBLICA DO CLIENTE
                 networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
-                string chaveSym = protocolSI.GetStringFromData();
+                string encryptedKeySym = protocolSI.GetStringFromData();
 
-                //decifrar chaveSym utilizando o RSA (chave publica do cliente)
-                aes.Key = rsa.Decrypt(Convert.FromBase64String(chaveSym), true); //ERRO POR PARTE DA INSTANCIA DO RSA NAO SER A MESMA QUE A DO SERVIDOR????
+               
 
 
 
                 //LEITURA DO IV CRIADO NO LADO DO SERVIDOR COM BASE NA CHAVE PUBLICA DO CLIENTE
                 networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
-                string IV = protocolSI.GetStringFromData();
+                string encryptedIV = protocolSI.GetStringFromData();
 
-                aes.IV = rsa.Decrypt(Convert.FromBase64String(IV), true);
+
+                //decifrar chaveSym utilizando o RSA (chave publica do cliente)
+                aes.Key = rsa.Decrypt(Convert.FromBase64String(encryptedKeySym), true); //ERRO POR PARTE DA INSTANCIA DO RSA NAO SER A MESMA QUE A DO SERVIDOR????
+                aes.IV = rsa.Decrypt(Convert.FromBase64String(encryptedIV), true);
 
             }
             catch (Exception)
