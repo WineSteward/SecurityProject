@@ -33,18 +33,19 @@
             this.textBoxMessage = new System.Windows.Forms.TextBox();
             this.btnEnviar = new System.Windows.Forms.Button();
             this.groupBoxLogin = new System.Windows.Forms.GroupBox();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.groupBoxConversa = new System.Windows.Forms.GroupBox();
             this.btnRegisto = new System.Windows.Forms.Button();
             this.btnLogin = new System.Windows.Forms.Button();
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.pictureBox5 = new System.Windows.Forms.PictureBox();
             this.textBoxPassword = new System.Windows.Forms.TextBox();
             this.textBoxUsername = new System.Windows.Forms.TextBox();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.groupBoxConversa = new System.Windows.Forms.GroupBox();
+            this.textBoxConversa = new System.Windows.Forms.TextBox();
             this.groupBoxLogin.SuspendLayout();
-            this.groupBoxConversa.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).BeginInit();
+            this.groupBoxConversa.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -90,26 +91,6 @@
             this.groupBoxLogin.TabIndex = 3;
             this.groupBoxLogin.TabStop = false;
             this.groupBoxLogin.Text = "Zona de Login";
-            // 
-            // progressBar1
-            // 
-            this.progressBar1.Location = new System.Drawing.Point(389, -3);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(24, 454);
-            this.progressBar1.TabIndex = 4;
-            // 
-            // groupBoxConversa
-            // 
-            this.groupBoxConversa.Controls.Add(this.textBoxMessage);
-            this.groupBoxConversa.Controls.Add(this.label1);
-            this.groupBoxConversa.Controls.Add(this.btnEnviar);
-            this.groupBoxConversa.Enabled = false;
-            this.groupBoxConversa.Location = new System.Drawing.Point(429, 18);
-            this.groupBoxConversa.Name = "groupBoxConversa";
-            this.groupBoxConversa.Size = new System.Drawing.Size(359, 420);
-            this.groupBoxConversa.TabIndex = 4;
-            this.groupBoxConversa.TabStop = false;
-            this.groupBoxConversa.Text = "Zona de Conversa";
             // 
             // btnRegisto
             // 
@@ -170,6 +151,36 @@
             this.textBoxUsername.Size = new System.Drawing.Size(229, 20);
             this.textBoxUsername.TabIndex = 12;
             // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(389, -3);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(24, 454);
+            this.progressBar1.TabIndex = 4;
+            // 
+            // groupBoxConversa
+            // 
+            this.groupBoxConversa.Controls.Add(this.textBoxConversa);
+            this.groupBoxConversa.Controls.Add(this.textBoxMessage);
+            this.groupBoxConversa.Controls.Add(this.label1);
+            this.groupBoxConversa.Controls.Add(this.btnEnviar);
+            this.groupBoxConversa.Enabled = false;
+            this.groupBoxConversa.Location = new System.Drawing.Point(429, 18);
+            this.groupBoxConversa.Name = "groupBoxConversa";
+            this.groupBoxConversa.Size = new System.Drawing.Size(359, 420);
+            this.groupBoxConversa.TabIndex = 4;
+            this.groupBoxConversa.TabStop = false;
+            this.groupBoxConversa.Text = "Zona de Conversa";
+            // 
+            // textBoxConversa
+            // 
+            this.textBoxConversa.Location = new System.Drawing.Point(6, 19);
+            this.textBoxConversa.Multiline = true;
+            this.textBoxConversa.Name = "textBoxConversa";
+            this.textBoxConversa.ReadOnly = true;
+            this.textBoxConversa.Size = new System.Drawing.Size(347, 293);
+            this.textBoxConversa.TabIndex = 3;
+            // 
             // FormCliente
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -182,10 +193,10 @@
             this.Text = "FormCliente";
             this.groupBoxLogin.ResumeLayout(false);
             this.groupBoxLogin.PerformLayout();
-            this.groupBoxConversa.ResumeLayout(false);
-            this.groupBoxConversa.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).EndInit();
+            this.groupBoxConversa.ResumeLayout(false);
+            this.groupBoxConversa.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -204,6 +215,7 @@
         private System.Windows.Forms.PictureBox pictureBox5;
         private System.Windows.Forms.TextBox textBoxPassword;
         private System.Windows.Forms.TextBox textBoxUsername;
+        private System.Windows.Forms.TextBox textBoxConversa;
     }
 }
 

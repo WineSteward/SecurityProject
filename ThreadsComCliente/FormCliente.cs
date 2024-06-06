@@ -7,10 +7,12 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using EI.SI;
@@ -19,19 +21,31 @@ namespace ThreadsComCliente
 {
     public partial class FormCliente : Form
     {
-        private const string DATABASE_LOCATION = @"C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\ThreadsComCliente\Database.mdf";
+        private const string DATABASE_LOCATION = @"C:\Users\MMC\Desktop\IPL\1 Ano\2_Semestre\Seguranca\SecurityProject\ThreadsComCliente\Database.mdf";
         private const int SALTSIZE = 8;
         private const int NUMBER_OF_ITERATIONS = 1000;
-
+        
         private const int PORT = 10000;
         NetworkStream networkStream;
         ProtocolSI protocolSI;
         TcpClient client;
         AesCryptoServiceProvider aes;
         RSACryptoServiceProvider rsa;
+
+        //chaves assimétricas
+        private string publicKey;
+        private string privateKey;
+
+        //chave simétrica
+        private string chaveSecreta;
+        //vetor de inicialização
+        private string iv;
+
         public FormCliente()
         {
             InitializeComponent();
+
+            this.FormClosed += Form_Closed;
 
             //Estabelecer ligacao com o servidor
             try
@@ -47,49 +61,22 @@ namespace ThreadsComCliente
                 //efetuar a ligacao ao servidor
                 client.Connect(endPoint);
 
+                aes = new AesCryptoServiceProvider();
+
                 //obter a ligacao do servidor
                 networkStream = client.GetStream();
 
                 protocolSI = new ProtocolSI();
 
-                aes = new AesCryptoServiceProvider();
+                // cria as chave publica e privada do cliente
+                Gerar_chaves();
+                //envio da chave publica para o servidor
+                Enviar_Chave_Publica();
 
-                //O CLIENTE ENVIA AO SERVIDOR A SUA CHAVE PUBLICA
-                //LOGO temos de crirar a chave publica
+                //inicia a thread do cliente para ficar a escuta dos dados que o servidor devolve               
+                Thread thread = new Thread(threadClient);
+                thread.Start();
 
-                //Algoritmo assimetrico
-                rsa = new RSACryptoServiceProvider();
-
-                //criar uma string XML contendo a chave do objeto AssymetricAlgorithm
-                //para obter a chave publica
-
-                string publicKey = rsa.ToXmlString(false); //FALSE devolve UNICAMENTE a PublicKey
-
-                string privateKey = rsa.ToXmlString(true); //FALSE devolve a PublicKey e a PrivateKey
-
-                //Preparacao para o envio da chave publica
-                byte[] packet = protocolSI.Make(ProtocolSICmdType.PUBLIC_KEY, publicKey);
-
-                //envio da chave publica
-                networkStream.Write(packet, 0, packet.Length);
-
-
-                //LEITURA DA CHAVE SIMETRICA CRIADA PELO SERVIDOR COM BASE NA CHAVE PUBLICA DO CLIENTE
-                networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
-                string encryptedKeySym = protocolSI.GetStringFromData();
-
-               
-
-
-
-                //LEITURA DO IV CRIADO NO LADO DO SERVIDOR COM BASE NA CHAVE PUBLICA DO CLIENTE
-                networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
-                string encryptedIV = protocolSI.GetStringFromData();
-
-
-                //decifrar chaveSym utilizando o RSA (chave publica do cliente)
-                aes.Key = rsa.Decrypt(Convert.FromBase64String(encryptedKeySym), true); //ERRO POR PARTE DA INSTANCIA DO RSA NAO SER A MESMA QUE A DO SERVIDOR????
-                aes.IV = rsa.Decrypt(Convert.FromBase64String(encryptedIV), true);
 
             }
             catch (Exception)
@@ -98,37 +85,178 @@ namespace ThreadsComCliente
                 networkStream.Close();
                 client.Close();
             }
-            /* usar para fechar a ligacao
-            finally
-            {
-                //Fechar a ligacao se estiver aberta
-                if (networkStream != null)
-                {
-                    networkStream.Close();
-                }
-                //Fecha a comunicacao se estiver aberta
-                if (client != null)
-                {
-                    client.Close();
+        }
 
+        private void threadClient()
+        {
+            protocolSI = new ProtocolSI();
+            
+            //Enquanto nao receber a informacao para fechar a comunicacao nao termina
+            while (protocolSI.GetCmdType() != ProtocolSICmdType.EOT)
+            {
+
+                int byteRead = networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
+                //byte[] ack;
+
+                //Com este switch vamos determinar o tipo de msg que estamos a receber
+                switch (protocolSI.GetCmdType())
+                {
+
+                    case ProtocolSICmdType.ACK:
+
+
+
+
+
+                    break;
+
+                    case ProtocolSICmdType.USER_OPTION_1:
+
+                    Chave_simetrica(protocolSI);
+
+                    break;
+
+                    case ProtocolSICmdType.USER_OPTION_2:
+
+                    Vetor_inicializacao(protocolSI);    
+
+                    break;
+
+                    //Recebi uma msg (string)
+                    case ProtocolSICmdType.DATA:
+
+                        //decifragem da mensagem recebida do cliente
+                        string mensagemDecifrada = DecifrarTexto(protocolSI.GetStringFromData());
+
+                        textBoxConversa.AppendText(mensagemDecifrada);
+                        /*
+                        //criamos um ack
+                        ack = protocolSI.Make(ProtocolSICmdType.ACK);
+
+                        //devolvemos o ack para a stream
+                        networkStream.Write(ack, 0, ack.Length);
+                        */
+                        break;
                 }
+            }
+        }
+
+
+        private void btnEnviar_Click(object sender, EventArgs e)
+        {
+            //Recolha da msg do client para uma variavel
+            string message = textBoxMessage.Text;
+
+            message = textBoxUsername.Text + ": " + message;
+
+            textBoxConversa.AppendText(Environment.NewLine);
+            textBoxConversa.AppendText(message);
+            textBoxConversa.AppendText(Environment.NewLine);
+
+            textBoxMessage.Clear();
+
+            string msgCifrada = CifrarTexto(message);
+
+            //Preparacao para o envio da msg
+            byte[] packet = protocolSI.Make(ProtocolSICmdType.DATA, msgCifrada);
+            networkStream.Write(packet, 0, packet.Length);
+
+            /*//Até receber um ACK lemos o que esta no buffer, depois fechamos a leitura ate novo ACK
+            while (protocolSI.GetCmdType() != ProtocolSICmdType.ACK)
+            {
+                networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
             }*/
         }
 
-        private void btnLogin_Click(object sender, EventArgs e)
+
+
+        // criação das chaves publicas e privadas
+        private void Gerar_chaves()
         {
-            if (textBoxUsername.Text != null || textBoxPassword.Text != null)
-            {
-                if (VerifyLogin(textBoxUsername.Text, textBoxPassword.Text))
-                {
-                    MessageBox.Show("LOGIN REALIZADO COM SUCESSO");
-                    groupBoxConversa.Enabled = true;
-                    groupBoxLogin.Enabled = false;
-                }
-            }
-            else
-                MessageBox.Show("Preencha todos os parâmetros");
+            rsa = new RSACryptoServiceProvider();
+            publicKey = rsa.ToXmlString(false);
+            privateKey = rsa.ToXmlString(true);
         }
+
+
+        //funçao que envia a chave publica do cliente para o servidor
+        private void Enviar_Chave_Publica()
+        {
+            try
+            {
+                //criação de um array de bytes com a mensagem a enviar e envio da mesma para o servidor
+                byte[] packet = protocolSI.Make(ProtocolSICmdType.PUBLIC_KEY, publicKey);
+                // Enviar mensagem
+                networkStream.Write(packet, 0, packet.Length);
+                /*while (protocolSI.GetCmdType() != ProtocolSICmdType.USER_OPTION_1)
+                {
+                    networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
+                }*/
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Erro no envio de dados ao servidor.", "Error Server", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+
+
+
+        // função recebe a chave simétrica do servidor
+        private void Chave_simetrica(ProtocolSI protocol)
+        {
+            try
+            {
+                string keyEnc = protocolSI.GetStringFromData();
+
+                byte[] dados = Convert.FromBase64String(keyEnc);
+                //decifrar dados utilizando RSA (chave privada do cliente)
+                byte[] dadosDec = rsa.Decrypt(dados, true);
+                chaveSecreta = Encoding.UTF8.GetString(dadosDec);
+                aes.Key = Convert.FromBase64String(chaveSecreta);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Erro na comunicação com o servidor.", "Error Server", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        //função recebe o vetor de inicialiização do servidor
+        private void Vetor_inicializacao(ProtocolSI protocol)
+        {
+            try
+            {
+                rsa.FromXmlString(privateKey);
+                string IVEnc = protocolSI.GetStringFromData();
+                byte[] dados = Convert.FromBase64String(IVEnc);
+                //decifrar dados utilizando RSA (chave privada do servidor)
+                byte[] dadosDec = rsa.Decrypt(dados, true);
+                iv = Encoding.UTF8.GetString(dadosDec);
+                aes.IV = Convert.FromBase64String(iv);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Erro na comunicação com o servidor.", "Error Server", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+
+        private void btnLogin_Click(object sender, EventArgs e)
+            {
+                if (textBoxUsername.Text != null || textBoxPassword.Text != null)
+                {
+                    if (VerifyLogin(textBoxUsername.Text, textBoxPassword.Text))
+                    {
+                        MessageBox.Show("LOGIN REALIZADO COM SUCESSO");
+                        groupBoxConversa.Enabled = true;
+                        groupBoxLogin.Enabled = false;
+                    }
+                }
+                else
+                    MessageBox.Show("Preencha todos os parâmetros");
+            }
 
         private void btnRegisto_Click(object sender, EventArgs e)
         {
@@ -264,25 +392,6 @@ namespace ThreadsComCliente
             return rfc2898.GetBytes(32);
         }
 
-        private void btnEnviar_Click(object sender, EventArgs e)
-        {
-            //Recolha da msg do client para uma variavel e limpeza da caixa de texto
-            string message = textBoxMessage.Text;
-            textBoxMessage.Clear();
-
-            string msgCifrada = CifrarTexto(message);
-
-            //Preparacao para o envio da msg
-            byte[] packet = protocolSI.Make(ProtocolSICmdType.DATA, msgCifrada);
-            networkStream.Write(packet, 0, packet.Length);
-
-            //Até receber um ACK lemos o que esta no buffer, depois fechamos a leitura ate novo ACK
-            while (protocolSI.GetCmdType() != ProtocolSICmdType.ACK)
-            {
-                networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
-            }
-        }
-
         private string CifrarTexto(string textoRaw)
         {
             //conversao do textoRaw em bytes de BASE64
@@ -336,15 +445,15 @@ namespace ThreadsComCliente
 
             return textoDecifrado;
         }
-        
-        private void FormCliente_FormClosing(object sender, FormClosingEventArgs e)
+
+        private void Form_Closed(object sender, FormClosedEventArgs e)
         {
             byte[] eot = protocolSI.Make(ProtocolSICmdType.EOT);
             networkStream.Write(eot, 0, eot.Length);
-            networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
 
             networkStream.Close();
             client.Close();
+
         }
     }
 }

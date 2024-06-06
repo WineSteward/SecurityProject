@@ -16,11 +16,14 @@ namespace ThreadServidor
 
         private TcpClient clientAtual;
         private int clientID;
-        private string clientPublicKey;
-        private byte[] key;
-        private byte[] iv;
-        AesCryptoServiceProvider aes;
-        private RSACryptoServiceProvider rsa;
+        private string key;
+        private string iv;
+        private string Chave_publica1;
+        private string Chave_publica2;
+        private string Chave_simetrica1;
+        private string Chave_simetrica2;
+        private string vetorinicializacao_1;
+        private string vetorinicializacao_2;
 
         public ClientHandler(TcpClient clientAtual, int clientID)
         {
@@ -46,165 +49,242 @@ namespace ThreadServidor
 
                 int byteRead = networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
                 byte[] ack;
+                int clientIDEncerrando;
 
                 //Com este switch vamos determinar o tipo de msg que estamos a receber
                 switch (protocolSI.GetCmdType())
                 {
+
+                    case ProtocolSICmdType.EOF:
+
+                        if (clientID == 1)
+                            clientIDEncerrando = 2;
+                        else
+                            clientIDEncerrando = 1;
+
+                        //decifragem da mensagem recebida do cliente
+                        string mensagem = "Cliente" + clientIDEncerrando + " terminou a sua sessão";
+
+                        // enviar msg para a consola do servidor com o ID do client e a msg
+                        Console.WriteLine(mensagem);
+
+                        // envia a msg do cliente emissor para o cliente recetor de forma segura
+                        ack = protocolSI.Make(ProtocolSICmdType.DATA, CifrarTexto(mensagem, Chave_simetrica2, vetorinicializacao_2));
+                        networkStream.Write(ack, 0, ack.Length);
+
+
+                        break;
+
+                    case ProtocolSICmdType.ACK:
+
+
+
+
+
+
+
+
+                        break;
+
+
                     //Recebi uma msg (string)
                     case ProtocolSICmdType.DATA:
 
+                        if (clientID == 1)
+                        {
+                            key = Chave_simetrica1;
+                            iv = vetorinicializacao_1;
+                        }
+                        else
+                        {
+                            key = Chave_simetrica2;
+                            iv = vetorinicializacao_2;
+                        }
+
                         //decifragem da mensagem recebida do cliente
-                        string mensagemDecifrada = DecifrarTexto(protocolSI.GetStringFromData());
+                        string mensagemDecifrada = DecifrarTexto(protocolSI.GetStringFromData(), key, iv);
 
                         // enviar msg para a consola do servidor com o ID do client e a msg
-                        Console.WriteLine("Cliente" + clientID + " : " + mensagemDecifrada);
+                        Console.WriteLine(mensagemDecifrada);
 
-                        //criamos um ack
-                        ack = protocolSI.Make(ProtocolSICmdType.ACK);
+                        if (Chave_simetrica2 == null || vetorinicializacao_2 == null)
+                            break;
 
-                        //devolvemos o ack para a stream
+
+                        // envia a msg do cliente emissor para o cliente recetor de forma segura
+                        ack = protocolSI.Make(ProtocolSICmdType.DATA, CifrarTexto(mensagemDecifrada, Chave_simetrica2, vetorinicializacao_2));
                         networkStream.Write(ack, 0, ack.Length);
+                        
+
 
                         break;
 
-                    case ProtocolSICmdType.EOT:
 
-                        Console.WriteLine("Ending thread from Client" + clientID);
-
-                        //criamos um ack
-                        ack = protocolSI.Make(ProtocolSICmdType.ACK);
-
-                        //devolvemos o ack para a stream
-                        networkStream.Write(ack, 0, ack.Length);
-
-                        break;
-
+                    // caso o protocolo que o cliente enviar for PUBLIC_KEY ele retorna a chave simetrica e o vetor de inicialização 
                     case ProtocolSICmdType.PUBLIC_KEY:
+                        if (clientID == 1)
+                        {
+                            Chave_publica1 = protocolSI.GetStringFromData();
+                            
+                            //cria a chave simetrica
+                            Chave_simetrica1 = Gerarchavesimetrica(Chave_publica1);
+                            
+                            //cria o vetor de inicialização
+                            vetorinicializacao_1 = Gerarvetorinicializacao(Chave_publica1);
+                            
+                            
+                            //ack = protocolSI.Make(ProtocolSICmdType.PUBLIC_KEY);
+                            //networkStream.Write(ack, 0, ack.Length);
+                            
 
-                        //guardar a public key
-                        clientPublicKey = protocolSI.GetStringFromData();
+                            // envia a chave simetrica cifrada com a chave publica para o cliente
+                            ack = protocolSI.Make(ProtocolSICmdType.USER_OPTION_1, Cifrar_com_chave_publica(Chave_simetrica1, Chave_publica1));
+                            networkStream.Write(ack, 0, ack.Length);
+                            
+                            //envia o vetor inicializacao cifrado com a chave publica para o cliente
+                            ack = protocolSI.Make(ProtocolSICmdType.USER_OPTION_2, Cifrar_com_chave_publica(vetorinicializacao_1, Chave_publica1));
+                            networkStream.Write(ack, 0, ack.Length);
+                        }
+                        else if (clientID == 2)
+                        {
+                            Chave_publica2 = protocolSI.GetStringFromData();
+                            
+                            //cria o vetor de inicialização
+                            vetorinicializacao_2 = Gerarvetorinicializacao(Chave_publica2);
+                            
+                            //cria a chave simetrica
+                            Chave_simetrica2 = Gerarchavesimetrica(Chave_publica2);
+                            
+                            ack = protocolSI.Make(ProtocolSICmdType.PUBLIC_KEY);
+                            networkStream.Write(ack, 0, ack.Length);
+                            
+                            // envia a chave simetrica e o vetor para o cliente
+                            ack = protocolSI.Make(ProtocolSICmdType.USER_OPTION_1, Cifrar_com_chave_publica(Chave_simetrica2, Chave_publica2));
+                            networkStream.Write(ack, 0, ack.Length);
+                            
+                            ack = protocolSI.Make(ProtocolSICmdType.USER_OPTION_2, Cifrar_com_chave_publica(vetorinicializacao_2, Chave_publica2));
+                            networkStream.Write(ack, 0, ack.Length);
+                        }
 
-                        //INICIALIZAR O SERVIÇO DE CIFRAGEM AES
-                        aes = new AesCryptoServiceProvider();
+                        //ack = protocolSI.Make(ProtocolSICmdType.ACK);
+                        //networkStream.Write(ack, 0, ack.Length);
 
-                        //instanciar o rsa
-                        rsa = new RSACryptoServiceProvider();
-
-                        //Gerar chave sym e iv a partir da chave publica do cliente
-                        key = GerarChaveSym(clientPublicKey);
-
-                        iv = GerarVetorInicializacao(clientPublicKey);
-
-                        //GUARDAR Sym Key e IV Gerados
-                        aes.Key = key;
-                        aes.IV = iv;
-
-                        //CIFRAR IV E SYMKEY UTILIZANDO O ALGORITMO RSA
-                        byte[] cypherdSymKey = rsa.Encrypt(key, true);
-                        byte[] cypherdIV = rsa.Encrypt(iv, true);
-
-                        string cypherdSymKeyB64 = Convert.ToBase64String(cypherdSymKey);
-                        string cypherdIVB64 = Convert.ToBase64String(cypherdIV);
-
-
-                        //preparacao do envio da chave simetrica
-                        byte[] packetPK = protocolSI.Make(ProtocolSICmdType.PUBLIC_KEY, cypherdSymKeyB64);
-                        networkStream.Write(packetPK, 0, packetPK.Length);
-
-
-                        //preparacao do envio do IV
-                        byte[] packetIV = protocolSI.Make(ProtocolSICmdType.IV, cypherdIVB64);
-                        networkStream.Write(packetIV, 0, packetIV.Length);
-
-
-                        break;
+                    break;
                 }
             }
-
-            networkStream.Close();
-
         }
 
-        //FUNCAO PARA GERAR UMA CHAVE SIMETRICA A PARTIR DE UMA STRING (segredo)
-        private byte[] GerarChaveSym(string segredo)
+        // função de cifra todo o texto que é para enviar para os clientes
+        private static string CifrarTexto(string txt, string key, string iv)
         {
-            byte[] salt = new byte[] { 0, 1, 0, 8, 2, 9, 0, 5 };
+            AesCryptoServiceProvider aes = new AesCryptoServiceProvider();
 
-            Rfc2898DeriveBytes passwordGeneration = new Rfc2898DeriveBytes(segredo, salt, 1000);
-
-            //Gerar chave
-            byte[] key = passwordGeneration.GetBytes(16);
-
-            return key;
-        }
-
-        //FUNCAO PARA GERAR VETOR DE INICIALIZACAO A PARTIR DE UMA STRING (segredo)
-        private byte[] GerarVetorInicializacao(string segredo)
-        {
-            //mudamos os salt para aumentar ainda mais a segurança
-            byte[] salt = new byte[] { 8, 6, 5, 2, 1, 9, 0, 8 };
-
-            Rfc2898DeriveBytes passwordGeneration = new Rfc2898DeriveBytes(segredo, salt, 1000);
-
-            //Gerar chave
-            byte[] iv = passwordGeneration.GetBytes(16);
-
-            return iv;
-        }
-
-
-        //FUNCAO PARA CIFRAR QUALQUER STRING COM A CHAVE SIMETRICA
-        private string CifrarMensagem(string textoRaw)
-        {
-            //conversao do textoRaw em bytes de BASE64
-            byte[] textoRaw64 = Encoding.UTF8.GetBytes(textoRaw);
-
-            //Reservar espaço na memoria para guardar o texto e cifra lo
-            MemoryStream ms = new MemoryStream();
-
-            //Inicializar o sitema de cifragem (write)
-            CryptoStream cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write);
-
-            //Cifrar os dados
-            cs.Write(textoRaw64, 0, textoRaw64.Length);
-            cs.Close();
+            aes.Key = Convert.FromBase64String(key);
+            aes.IV = Convert.FromBase64String(iv);
+            //variavel para guardar o texto decifrado em bytes
+            byte[] txtDecifrado = Encoding.UTF8.GetBytes(txt);
 
             //variavel para guardar o texto cifrado em bytes
-            //Guardar os dados cifrados que estao na memoria
-            byte[] textoCifrado = ms.ToArray();
+            byte[] txtcifrado;
 
-            //Converter de bytes para base64(texto)
-            string textoCifradoBase64 = Convert.ToBase64String(textoCifrado);
+            //reservar espaço em memória para por la o texto a cifrá-lo
+            MemoryStream ms = new MemoryStream();
 
-            return textoCifradoBase64;
+            //inicializar o sistema de Cifragem(write)
+            CryptoStream cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write);
+
+            //cifrar os dados
+            cs.Write(txtDecifrado, 0, txtDecifrado.Length);
+            cs.Close();
+
+            //guardar os dados cifrados que estão em memória
+            txtcifrado = ms.ToArray();
+
+            //converter os bytes para Base64 (texto)
+            string txtCifradob64 = Convert.ToBase64String(txtcifrado);
+
+            //devolver os bytes cifrados em Base64(texto)
+            return txtCifradob64;
         }
 
-        private string DecifrarTexto(string textoCifradoBase64)
+
+        //função que decifra todo o texto que está cifrado que é enviado do cliente. 
+        private static string DecifrarTexto(string txt, string key, string iv)
         {
-            //conversao da string textoCifrado em array de bytes
-            byte[] textoCifrado = Convert.FromBase64String(textoCifradoBase64);
+            AesCryptoServiceProvider aes = new AesCryptoServiceProvider();
 
-            //Reservar espaço na memoria para guardar o texto e decifra lo
-            MemoryStream memoryStream = new MemoryStream(textoCifrado);
+            aes.Key = Convert.FromBase64String(key);
+            aes.IV = Convert.FromBase64String(iv);
+            //variavel para guardar o texto cifrado em bytes
+            byte[] txtcifrado = Convert.FromBase64String(txt);
 
-            //Inicializar o sitema de DECIFRAGEM (read)
-            CryptoStream cryptoStream = new CryptoStream(memoryStream, aes.CreateDecryptor(), CryptoStreamMode.Read);
+            //reservar espaço em memória para por la o texto a decifrá-lo
+            MemoryStream ms = new MemoryStream(txtcifrado);
 
-            //Array de bytes do mesmo tamanho do espaço que reservamos anteriormente
-            byte[] bytesParaDecifrar = new byte[memoryStream.Length];
+            //inicializar o sistema de Decifragem(Read)
+            CryptoStream cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Read);
 
-            //varivavel para guardar o numero de bytes decifrados
-            int bytesLidos = 0;
+            //variavel para guardar o texto decifrado em bytes
+            byte[] plainbytes = new byte[ms.Length];
 
-            //Decifragem dos Bytes e guardamos a bytes que lemos
-            bytesLidos = cryptoStream.Read(bytesParaDecifrar, 0, bytesParaDecifrar.Length);
-            cryptoStream.Close();
+            //decifrar os dados
+            cs.Read(plainbytes, 0, plainbytes.Length);
+            cs.Close();
 
-            //conversao de int para string (texto)
-            string textoDecifrado = Encoding.UTF8.GetString(bytesParaDecifrar, 0, bytesLidos);
+            //converter os bytes para UTF8 (texto)
+            string txtdecifradob64 = Encoding.UTF8.GetString(plainbytes);
 
-            return textoDecifrado;
+            //devolver os bytes decifrados em UTF8(texto)
+            return txtdecifradob64;
+
         }
+
+        //cifra os dados com a chave publica e retorna-os
+        public static string Cifrar_com_chave_publica(string key, string publickey)
+        {
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+            rsa.FromXmlString(publickey);
+            //obter chave simétrica para cifrar
+            byte[] dados = Encoding.UTF8.GetBytes(key);
+            //cifrar daos utilizando RSA
+            byte[] dadosEnc = rsa.Encrypt(dados, true);
+            return Convert.ToBase64String(dadosEnc);
+        }
+
+        //fução que gere a chave simétrica 
+        private static string Gerarchavesimetrica(string pass)
+        {
+            byte[] salt = new byte[] { 0, 1, 0, 8, 1, 9, 9, 7 };
+            Rfc2898DeriveBytes pwdGen = new Rfc2898DeriveBytes(pass, salt, 1000);
+
+            // Gerar a key (chave)
+            byte[] key = pwdGen.GetBytes(16);
+
+            //converter a password em base64
+            string passB64 = Convert.ToBase64String(key);
+
+            //devolver
+            return passB64;
+        }
+
+        //função que gere o vetor de inicialização
+        private static string Gerarvetorinicializacao(string pass)
+        {
+            byte[] salt = new byte[] { 6, 3, 7, 8, 0, 1, 2, 3 };
+            Rfc2898DeriveBytes pwdGen = new Rfc2898DeriveBytes(pass, salt, 1000);
+
+            // Gerar a vetor
+            byte[] iv = pwdGen.GetBytes(16);
+
+            //converter a password em base64
+            string ivB64 = Convert.ToBase64String(iv);
+
+            //devolver
+            return ivB64;
+        }
+
+
+
 
     }
 }
