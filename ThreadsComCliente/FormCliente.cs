@@ -24,7 +24,7 @@ namespace ThreadsComCliente
         private const string DATABASE_LOCATION = @"C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\ThreadsComCliente\Database.mdf";
         private const int SALTSIZE = 8;
         private const int NUMBER_OF_ITERATIONS = 1000;
-        
+
         private const int PORT = 10000;
         NetworkStream networkStream;
         ProtocolSI protocolSI;
@@ -45,8 +45,6 @@ namespace ThreadsComCliente
         public FormCliente()
         {
             InitializeComponent();
-
-            //this.FormClosed += Form_Closed;
 
             //Estabelecer ligacao com o servidor
             try
@@ -91,7 +89,7 @@ namespace ThreadsComCliente
         private void threadClient()
         {
             protocolSI = new ProtocolSI();
-            
+
             //Enquanto nao receber a informacao para fechar a comunicacao nao termina
             while (protocolSI.GetCmdType() != ProtocolSICmdType.EOT)
             {
@@ -104,15 +102,15 @@ namespace ThreadsComCliente
 
                     case ProtocolSICmdType.USER_OPTION_1:
 
-                    Chave_simetrica(protocolSI);
+                        Chave_simetrica(protocolSI);
 
-                    break;
+                        break;
 
                     case ProtocolSICmdType.USER_OPTION_2:
 
-                    Vetor_inicializacao(protocolSI);    
+                        Vetor_inicializacao(protocolSI);
 
-                    break;
+                        break;
 
                     //Recebi uma msg (string)
                     case ProtocolSICmdType.DATA:
@@ -121,26 +119,30 @@ namespace ThreadsComCliente
                         string mensagemDecifrada = DecifrarTexto(protocolSI.GetStringFromData());
 
 
-                        textBoxConversa.Invoke((MethodInvoker)delegate {
+                        textBoxConversa.Invoke((MethodInvoker)delegate
+                        {
                             // Running on the UI thread
                             textBoxConversa.AppendText(mensagemDecifrada);
                         });
-                        
-                        
+
+
                         //criamos um ack
                         ack = protocolSI.Make(ProtocolSICmdType.ACK);
 
                         //devolvemos o ack para a stream
                         networkStream.Write(ack, 0, ack.Length);
-                        
-                    break;
 
-                        //receber mensagem do servidor providenciado pelo outro cliente
+                        break;
+
+                    //receber mensagem do servidor providenciado pelo outro cliente
                     case ProtocolSICmdType.USER_OPTION_9:
 
                         string msg = protocolSI.GetStringFromData();
 
-                        textBoxConversa.Invoke((MethodInvoker)delegate {
+                        //string msg = DecifrarTexto(msgCifrada);
+
+                        textBoxConversa.Invoke((MethodInvoker)delegate
+                        {
                             // Running on the UI thread
                             textBoxConversa.AppendText(msg);
                         });
@@ -158,7 +160,8 @@ namespace ThreadsComCliente
 
             message = textBoxUsername.Text + ": " + message;
 
-            textBoxConversa.Invoke((MethodInvoker)delegate {
+            textBoxConversa.Invoke((MethodInvoker)delegate
+            {
 
                 // Running on the UI thread
                 textBoxConversa.AppendText(Environment.NewLine);
@@ -167,13 +170,32 @@ namespace ThreadsComCliente
                 textBoxMessage.Clear();
             });
 
-            string msgCifrada = CifrarTexto(message);
+            byte[] msgCifrada = CifrarTexto(message);
 
-            //Preparacao para o envio da msg
+            byte[] assinatura = Assinar_Msg(msgCifrada);
+
+            //Envio da mensagem do cliente para o servidor
             byte[] packet = protocolSI.Make(ProtocolSICmdType.DATA, msgCifrada);
             networkStream.Write(packet, 0, packet.Length);
+
+            //enviar assinatura digital para o servidor
+            byte[] packet1 = protocolSI.Make(ProtocolSICmdType.DATA, assinatura);
+            networkStream.Write(packet1, 0, packet1.Length);
+
         }
 
+        //criamos a hash e ciframos com a chave privada do cliente
+        private byte[] Assinar_Msg(byte[] msg)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] hash = sha256.ComputeHash(msg);
+
+                byte[] signature = rsa.SignHash(hash, CryptoConfig.MapNameToOID("SHA256"));
+
+                return signature;
+            }
+        }
 
 
         // criação das chaves publicas e privadas
@@ -257,19 +279,19 @@ namespace ThreadsComCliente
 
 
         private void btnLogin_Click(object sender, EventArgs e)
+        {
+            if (textBoxUsername.Text != null || textBoxPassword.Text != null)
             {
-                if (textBoxUsername.Text != null || textBoxPassword.Text != null)
+                if (VerifyLogin(textBoxUsername.Text, textBoxPassword.Text))
                 {
-                    if (VerifyLogin(textBoxUsername.Text, textBoxPassword.Text))
-                    {
-                        MessageBox.Show("LOGIN REALIZADO COM SUCESSO");
-                        groupBoxConversa.Enabled = true;
-                        groupBoxLogin.Enabled = false;
-                    }
+                    MessageBox.Show("LOGIN REALIZADO COM SUCESSO");
+                    groupBoxConversa.Enabled = true;
+                    groupBoxLogin.Enabled = false;
                 }
-                else
-                    MessageBox.Show("Preencha todos os parâmetros");
             }
+            else
+                MessageBox.Show("Preencha todos os parâmetros");
+        }
 
         private void btnRegisto_Click(object sender, EventArgs e)
         {
@@ -405,7 +427,7 @@ namespace ThreadsComCliente
             return rfc2898.GetBytes(32);
         }
 
-        private string CifrarTexto(string textoRaw)
+        private byte[] CifrarTexto(string textoRaw)
         {
             //conversao do textoRaw em bytes de BASE64
             byte[] textoRaw64 = Encoding.UTF8.GetBytes(textoRaw);
@@ -426,10 +448,7 @@ namespace ThreadsComCliente
             //Guardar os dados cifrados que estao na memoria
             textoCifrado = memoryStream.ToArray();
 
-            //Converter de bytes para base64(texto)
-            string textoCifradoBase64 = Convert.ToBase64String(textoCifrado);
-
-            return textoCifradoBase64;
+            return textoCifrado;
         }
 
         private string DecifrarTexto(string textoCifradoBase64)
@@ -458,22 +477,6 @@ namespace ThreadsComCliente
 
             return textoDecifrado;
         }
-
-        private void btnSair_Click(object sender, EventArgs e)
-        {
-            byte[] eot = protocolSI.Make(ProtocolSICmdType.EOT);
-            networkStream.Write(eot, 0, eot.Length);
-            networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
-
-            networkStream.Close();
-            client.Close();
-        }
-        /*
-private void Form_Closed(object sender, FormClosedEventArgs e)
-{
-   
-
-}*/
     }
 }
 
