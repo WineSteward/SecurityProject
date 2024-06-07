@@ -41,6 +41,7 @@
             this.textBoxUsername = new System.Windows.Forms.TextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.groupBoxConversa = new System.Windows.Forms.GroupBox();
+            this.btnSair = new System.Windows.Forms.Button();
             this.textBoxConversa = new System.Windows.Forms.TextBox();
             this.groupBoxLogin.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
@@ -87,7 +88,7 @@
             this.groupBoxLogin.Controls.Add(this.textBoxUsername);
             this.groupBoxLogin.Location = new System.Drawing.Point(16, 18);
             this.groupBoxLogin.Name = "groupBoxLogin";
-            this.groupBoxLogin.Size = new System.Drawing.Size(357, 420);
+            this.groupBoxLogin.Size = new System.Drawing.Size(297, 420);
             this.groupBoxLogin.TabIndex = 3;
             this.groupBoxLogin.TabStop = false;
             this.groupBoxLogin.Text = "Zona de Login";
@@ -96,7 +97,7 @@
             // 
             this.btnRegisto.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(16)))), ((int)(((byte)(72)))), ((int)(((byte)(98)))));
             this.btnRegisto.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.btnRegisto.Location = new System.Drawing.Point(119, 306);
+            this.btnRegisto.Location = new System.Drawing.Point(95, 307);
             this.btnRegisto.Name = "btnRegisto";
             this.btnRegisto.Size = new System.Drawing.Size(115, 33);
             this.btnRegisto.TabIndex = 17;
@@ -108,7 +109,7 @@
             // 
             this.btnLogin.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(16)))), ((int)(((byte)(72)))), ((int)(((byte)(98)))));
             this.btnLogin.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.btnLogin.Location = new System.Drawing.Point(119, 250);
+            this.btnLogin.Location = new System.Drawing.Point(95, 251);
             this.btnLogin.Name = "btnLogin";
             this.btnLogin.Size = new System.Drawing.Size(115, 33);
             this.btnLogin.TabIndex = 16;
@@ -119,7 +120,7 @@
             // pictureBox4
             // 
             this.pictureBox4.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox4.Image")));
-            this.pictureBox4.Location = new System.Drawing.Point(32, 79);
+            this.pictureBox4.Location = new System.Drawing.Point(12, 83);
             this.pictureBox4.Name = "pictureBox4";
             this.pictureBox4.Size = new System.Drawing.Size(57, 27);
             this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -129,7 +130,7 @@
             // pictureBox5
             // 
             this.pictureBox5.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox5.Image")));
-            this.pictureBox5.Location = new System.Drawing.Point(32, 179);
+            this.pictureBox5.Location = new System.Drawing.Point(12, 183);
             this.pictureBox5.Name = "pictureBox5";
             this.pictureBox5.Size = new System.Drawing.Size(57, 27);
             this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -138,39 +139,52 @@
             // 
             // textBoxPassword
             // 
-            this.textBoxPassword.Location = new System.Drawing.Point(95, 186);
+            this.textBoxPassword.Location = new System.Drawing.Point(75, 190);
             this.textBoxPassword.Name = "textBoxPassword";
-            this.textBoxPassword.Size = new System.Drawing.Size(229, 20);
+            this.textBoxPassword.Size = new System.Drawing.Size(177, 20);
             this.textBoxPassword.TabIndex = 13;
             // 
             // textBoxUsername
             // 
             this.textBoxUsername.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBoxUsername.Location = new System.Drawing.Point(95, 86);
+            this.textBoxUsername.Location = new System.Drawing.Point(75, 90);
             this.textBoxUsername.Name = "textBoxUsername";
-            this.textBoxUsername.Size = new System.Drawing.Size(229, 20);
+            this.textBoxUsername.Size = new System.Drawing.Size(177, 20);
             this.textBoxUsername.TabIndex = 12;
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(389, -3);
+            this.progressBar1.Location = new System.Drawing.Point(319, -1);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(24, 454);
             this.progressBar1.TabIndex = 4;
             // 
             // groupBoxConversa
             // 
+            this.groupBoxConversa.Controls.Add(this.btnSair);
             this.groupBoxConversa.Controls.Add(this.textBoxConversa);
             this.groupBoxConversa.Controls.Add(this.textBoxMessage);
             this.groupBoxConversa.Controls.Add(this.label1);
             this.groupBoxConversa.Controls.Add(this.btnEnviar);
             this.groupBoxConversa.Enabled = false;
-            this.groupBoxConversa.Location = new System.Drawing.Point(429, 18);
+            this.groupBoxConversa.Location = new System.Drawing.Point(349, 18);
             this.groupBoxConversa.Name = "groupBoxConversa";
-            this.groupBoxConversa.Size = new System.Drawing.Size(359, 420);
+            this.groupBoxConversa.Size = new System.Drawing.Size(439, 420);
             this.groupBoxConversa.TabIndex = 4;
             this.groupBoxConversa.TabStop = false;
             this.groupBoxConversa.Text = "Zona de Conversa";
+            // 
+            // btnSair
+            // 
+            this.btnSair.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(16)))), ((int)(((byte)(72)))), ((int)(((byte)(98)))));
+            this.btnSair.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.btnSair.Location = new System.Drawing.Point(377, 19);
+            this.btnSair.Name = "btnSair";
+            this.btnSair.Size = new System.Drawing.Size(56, 27);
+            this.btnSair.TabIndex = 4;
+            this.btnSair.Text = "Sair";
+            this.btnSair.UseVisualStyleBackColor = false;
+            this.btnSair.Click += new System.EventHandler(this.btnSair_Click);
             // 
             // textBoxConversa
             // 
@@ -178,7 +192,7 @@
             this.textBoxConversa.Multiline = true;
             this.textBoxConversa.Name = "textBoxConversa";
             this.textBoxConversa.ReadOnly = true;
-            this.textBoxConversa.Size = new System.Drawing.Size(347, 293);
+            this.textBoxConversa.Size = new System.Drawing.Size(348, 279);
             this.textBoxConversa.TabIndex = 3;
             // 
             // FormCliente
@@ -216,6 +230,7 @@
         private System.Windows.Forms.TextBox textBoxPassword;
         private System.Windows.Forms.TextBox textBoxUsername;
         private System.Windows.Forms.TextBox textBoxConversa;
+        private System.Windows.Forms.Button btnSair;
     }
 }
 

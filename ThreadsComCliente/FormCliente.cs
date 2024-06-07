@@ -21,7 +21,7 @@ namespace ThreadsComCliente
 {
     public partial class FormCliente : Form
     {
-        private const string DATABASE_LOCATION = @"C:\Users\MMC\Desktop\IPL\1 Ano\2_Semestre\Seguranca\SecurityProject\ThreadsComCliente\Database.mdf";
+        private const string DATABASE_LOCATION = @"C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\ThreadsComCliente\Database.mdf";
         private const int SALTSIZE = 8;
         private const int NUMBER_OF_ITERATIONS = 1000;
         
@@ -31,6 +31,7 @@ namespace ThreadsComCliente
         TcpClient client;
         AesCryptoServiceProvider aes;
         RSACryptoServiceProvider rsa;
+        byte[] ack;
 
         //chaves assimétricas
         private string publicKey;
@@ -45,7 +46,7 @@ namespace ThreadsComCliente
         {
             InitializeComponent();
 
-            this.FormClosed += Form_Closed;
+            //this.FormClosed += Form_Closed;
 
             //Estabelecer ligacao com o servidor
             try
@@ -96,19 +97,10 @@ namespace ThreadsComCliente
             {
 
                 int byteRead = networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
-                //byte[] ack;
 
                 //Com este switch vamos determinar o tipo de msg que estamos a receber
                 switch (protocolSI.GetCmdType())
                 {
-
-                    case ProtocolSICmdType.ACK:
-
-
-
-
-
-                    break;
 
                     case ProtocolSICmdType.USER_OPTION_1:
 
@@ -125,17 +117,34 @@ namespace ThreadsComCliente
                     //Recebi uma msg (string)
                     case ProtocolSICmdType.DATA:
 
-                        //decifragem da mensagem recebida do cliente
+                        //decifragem da mensagem recebida do servidor
                         string mensagemDecifrada = DecifrarTexto(protocolSI.GetStringFromData());
 
-                        textBoxConversa.AppendText(mensagemDecifrada);
-                        /*
+
+                        textBoxConversa.Invoke((MethodInvoker)delegate {
+                            // Running on the UI thread
+                            textBoxConversa.AppendText(mensagemDecifrada);
+                        });
+                        
+                        
                         //criamos um ack
                         ack = protocolSI.Make(ProtocolSICmdType.ACK);
 
                         //devolvemos o ack para a stream
                         networkStream.Write(ack, 0, ack.Length);
-                        */
+                        
+                    break;
+
+                        //receber mensagem do servidor providenciado pelo outro cliente
+                    case ProtocolSICmdType.USER_OPTION_9:
+
+                        string msg = protocolSI.GetStringFromData();
+
+                        textBoxConversa.Invoke((MethodInvoker)delegate {
+                            // Running on the UI thread
+                            textBoxConversa.AppendText(msg);
+                        });
+
                         break;
                 }
             }
@@ -149,23 +158,20 @@ namespace ThreadsComCliente
 
             message = textBoxUsername.Text + ": " + message;
 
-            textBoxConversa.AppendText(Environment.NewLine);
-            textBoxConversa.AppendText(message);
-            textBoxConversa.AppendText(Environment.NewLine);
+            textBoxConversa.Invoke((MethodInvoker)delegate {
 
-            textBoxMessage.Clear();
+                // Running on the UI thread
+                textBoxConversa.AppendText(Environment.NewLine);
+                textBoxConversa.AppendText(message);
+                textBoxConversa.AppendText(Environment.NewLine);
+                textBoxMessage.Clear();
+            });
 
             string msgCifrada = CifrarTexto(message);
 
             //Preparacao para o envio da msg
             byte[] packet = protocolSI.Make(ProtocolSICmdType.DATA, msgCifrada);
             networkStream.Write(packet, 0, packet.Length);
-
-            /*//Até receber um ACK lemos o que esta no buffer, depois fechamos a leitura ate novo ACK
-            while (protocolSI.GetCmdType() != ProtocolSICmdType.ACK)
-            {
-                networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
-            }*/
         }
 
 
@@ -188,10 +194,11 @@ namespace ThreadsComCliente
                 byte[] packet = protocolSI.Make(ProtocolSICmdType.PUBLIC_KEY, publicKey);
                 // Enviar mensagem
                 networkStream.Write(packet, 0, packet.Length);
-                /*while (protocolSI.GetCmdType() != ProtocolSICmdType.USER_OPTION_1)
+
+                while (protocolSI.GetCmdType() != ProtocolSICmdType.ACK)
                 {
                     networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
-                }*/
+                }
             }
             catch (Exception)
             {
@@ -215,6 +222,9 @@ namespace ThreadsComCliente
                 byte[] dadosDec = rsa.Decrypt(dados, true);
                 chaveSecreta = Encoding.UTF8.GetString(dadosDec);
                 aes.Key = Convert.FromBase64String(chaveSecreta);
+
+                ack = protocolSI.Make(ProtocolSICmdType.ACK);
+                networkStream.Write(ack, 0, ack.Length);
             }
             catch (Exception)
             {
@@ -234,6 +244,9 @@ namespace ThreadsComCliente
                 byte[] dadosDec = rsa.Decrypt(dados, true);
                 iv = Encoding.UTF8.GetString(dadosDec);
                 aes.IV = Convert.FromBase64String(iv);
+
+                ack = protocolSI.Make(ProtocolSICmdType.ACK);
+                networkStream.Write(ack, 0, ack.Length);
             }
             catch (Exception)
             {
@@ -446,15 +459,21 @@ namespace ThreadsComCliente
             return textoDecifrado;
         }
 
-        private void Form_Closed(object sender, FormClosedEventArgs e)
+        private void btnSair_Click(object sender, EventArgs e)
         {
             byte[] eot = protocolSI.Make(ProtocolSICmdType.EOT);
             networkStream.Write(eot, 0, eot.Length);
+            networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
 
             networkStream.Close();
             client.Close();
-
         }
+        /*
+private void Form_Closed(object sender, FormClosedEventArgs e)
+{
+   
+
+}*/
     }
 }
 
