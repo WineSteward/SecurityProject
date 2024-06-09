@@ -42,6 +42,7 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.groupBoxConversa = new System.Windows.Forms.GroupBox();
             this.textBoxConversa = new System.Windows.Forms.TextBox();
+            this.btnSair = new System.Windows.Forms.Button();
             this.groupBoxLogin.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).BeginInit();
@@ -167,7 +168,7 @@
             this.groupBoxConversa.Enabled = false;
             this.groupBoxConversa.Location = new System.Drawing.Point(349, 18);
             this.groupBoxConversa.Name = "groupBoxConversa";
-            this.groupBoxConversa.Size = new System.Drawing.Size(439, 420);
+            this.groupBoxConversa.Size = new System.Drawing.Size(367, 420);
             this.groupBoxConversa.TabIndex = 4;
             this.groupBoxConversa.TabStop = false;
             this.groupBoxConversa.Text = "Zona de Conversa";
@@ -181,14 +182,28 @@
             this.textBoxConversa.Size = new System.Drawing.Size(348, 279);
             this.textBoxConversa.TabIndex = 3;
             // 
+            // btnSair
+            // 
+            this.btnSair.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(16)))), ((int)(((byte)(72)))), ((int)(((byte)(98)))));
+            this.btnSair.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.btnSair.Location = new System.Drawing.Point(737, 12);
+            this.btnSair.Name = "btnSair";
+            this.btnSair.Size = new System.Drawing.Size(51, 28);
+            this.btnSair.TabIndex = 5;
+            this.btnSair.Text = "Sair";
+            this.btnSair.UseVisualStyleBackColor = false;
+            this.btnSair.Click += new System.EventHandler(this.btnSair_Click);
+            // 
             // FormCliente
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.btnSair);
             this.Controls.Add(this.groupBoxConversa);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.groupBoxLogin);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "FormCliente";
             this.Text = "FormCliente";
             this.groupBoxLogin.ResumeLayout(false);
@@ -216,6 +231,7 @@
         private System.Windows.Forms.TextBox textBoxPassword;
         private System.Windows.Forms.TextBox textBoxUsername;
         private System.Windows.Forms.TextBox textBoxConversa;
+        private System.Windows.Forms.Button btnSair;
     }
 }
 

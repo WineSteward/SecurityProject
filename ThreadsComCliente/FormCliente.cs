@@ -76,7 +76,6 @@ namespace ThreadsComCliente
                 Thread thread = new Thread(threadClient);
                 thread.Start();
 
-
             }
             catch (Exception)
             {
@@ -94,12 +93,12 @@ namespace ThreadsComCliente
             while (protocolSI.GetCmdType() != ProtocolSICmdType.EOT)
             {
 
-                int byteRead = networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
+                networkStream.Read(protocolSI.Buffer, 0, protocolSI.Buffer.Length);
 
                 //Com este switch vamos determinar o tipo de msg que estamos a receber
                 switch (protocolSI.GetCmdType())
                 {
-
+                     
                     case ProtocolSICmdType.USER_OPTION_1:
 
                         Chave_simetrica(protocolSI);
@@ -150,6 +149,15 @@ namespace ThreadsComCliente
                         break;
                 }
             }
+
+            networkStream.Close();
+            client.Close();
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                // Running on the UI thread
+                this.Close();
+            });
         }
 
 
@@ -275,8 +283,6 @@ namespace ThreadsComCliente
                 MessageBox.Show("Erro na comunicação com o servidor.", "Error Server", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
@@ -476,6 +482,12 @@ namespace ThreadsComCliente
             string textoDecifrado = Encoding.UTF8.GetString(bytesParaDecifrar, 0, bytesLidos);
 
             return textoDecifrado;
+        }
+
+        private void btnSair_Click(object sender, EventArgs e)
+        {
+            ack = protocolSI.Make(ProtocolSICmdType.EOT);
+            networkStream.Write(ack, 0, ack.Length);
         }
     }
 }
