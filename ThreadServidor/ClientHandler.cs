@@ -27,7 +27,7 @@ namespace ThreadServidor
         private string Chave_simetrica2;
         private string vetorinicializacao_1;
         private string vetorinicializacao_2;
-        private string logFile = @"C:\Users\MMC\Desktop\ObjectOProgramming\SecurityProject\logFile.txt";
+        private string logFile = @"C:\Users\MMC\Documents\logFile.txt";
 
 
         public ClientHandler(TcpClient clientAtual, int clientID, List<TcpClient> clients)
@@ -159,8 +159,9 @@ namespace ThreadServidor
                                     // Criar o buffer de texto de escrita
                                     using (StreamWriter sw = new StreamWriter(fs))
                                     {
+
                                         // Guardar os dados no ficheio com string
-                                        sw.WriteLine(mensagemCifrada);
+                                        sw.WriteLine(mensagemDecifrada);
                                     }
                                 }
 
@@ -205,7 +206,7 @@ namespace ThreadServidor
                                     using (StreamWriter sw = new StreamWriter(fs))
                                     {
                                         // Guardar os dados no ficheio com string
-                                        sw.WriteLine(mensagemCifrada);
+                                        sw.WriteLine(mensagemDecifrada);
                                      }
                                 }
 
@@ -227,7 +228,7 @@ namespace ThreadServidor
             byte[] eot = protocolSI.Make(ProtocolSICmdType.EOT);
             networkStream.Write(eot, 0, eot.Length);
 
-            string mensagem = "Cliente" + clientID + " terminou a sua sessão";
+            string mensagem = "Cliente " + clientID + " terminou a sua sessão";
 
             // Definir o stream de ligação ao ficheiro em modo append e para escrita
             using (FileStream fs = new FileStream(logFile, FileMode.Append, FileAccess.Write))

@@ -1,4 +1,0 @@
-Cliente1 terminou a sua sessão
-
-
-System.String[]
