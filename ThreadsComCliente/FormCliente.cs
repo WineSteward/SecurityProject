@@ -45,6 +45,7 @@ namespace ThreadsComCliente
         public FormCliente()
         {
             InitializeComponent();
+            textBoxPassword.PasswordChar = '*';
 
             //Estabelecer ligacao com o servidor
             try
@@ -121,7 +122,7 @@ namespace ThreadsComCliente
                         textBoxConversa.Invoke((MethodInvoker)delegate
                         {
                             // Running on the UI thread
-                            textBoxConversa.AppendText(mensagemDecifrada);
+                            textBoxConversa.AppendText(mensagemDecifrada+ "\r\n");
                         });
 
 
@@ -143,7 +144,7 @@ namespace ThreadsComCliente
                         textBoxConversa.Invoke((MethodInvoker)delegate
                         {
                             // Running on the UI thread
-                            textBoxConversa.AppendText(msg);
+                            textBoxConversa.AppendText(msg+ "\r\n");
                         });
 
                         break;
